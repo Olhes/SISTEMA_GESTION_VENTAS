@@ -1,0 +1,30 @@
+{
+  "name": "albas-frontend",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@nuxt/image": "^1.11.0",
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^24.10.1",
+    "nuxt": "^4.2.0",
+    "pinia": "^2.2.6",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3",
+    "vue": "^3.5.22",
+    "vue-router": "^4.6.3"
+  },
+  "dependencies": {
+    "@headlessui/vue": "^1.7.23",
+    "@heroicons/vue": "^2.2.0",
+    "@nuxtjs/tailwindcss": "^6.12.1",
+    "ofetch": "^1.4.1"
+  }
+}
