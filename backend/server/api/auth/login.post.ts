@@ -1,31 +1,15 @@
-import { authService } from '~/src/modules/auth/services/auth.service';
-import type { LoginRequest } from '~/src/shared/types';
+import { authController } from '~/src/modules/auth';
 
 export default defineEventHandler(async (event) => {
-  try {
-    const body = await readBody<LoginRequest>(event);
-    const { username, password } = body;
-
-    if (!username || !password) {
-      throw createError({
-        statusCode: 400,
-        message: "Usuario y contraseña son requeridos",
-      });
-    }
-
-    const loginResponse = await authService.login({ username, password });
-
+  const response = await authController.login(event);
+  
+  // Mantener la sesión de usuario para compatibilidad
+  if (response.status === 'success' && response.user) {
     await setUserSession(event, {
-      user: loginResponse.user,
+      user: response.user,
       loggedInAt: new Date(),
     });
-
-    return loginResponse;
-  } catch (error) {
-    console.error('Login error:', error);
-    throw createError({
-      statusCode: 401,
-      message: error instanceof Error ? error.message : "Error de autenticación",
-    });
   }
+  
+  return response;
 });

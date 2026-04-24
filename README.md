@@ -1,259 +1,352 @@
-# ALBAS
+# Sistema ALBAS - Arquitectura Modular Completa
 
-Este repositorio contiene el dashboard administrativo construido con **Nuxt.js 4, TypeScript** y se
-conecta a una base de datos **PostgreSQL** (con soporte para Supabase). El proyecto incluye
-autenticación de usuarios con roles, gestión de leads, ventas y clientes, y está desplegado en
-**NuxtHub** con **Cloudflare** usando Workers.
+## **🎯 Descripción del Proyecto**
+Sistema de Gestión de Ventas para Inmobiliaria NAVAS, **completamente migrado** desde monolito a arquitectura modular moderna:
 
-## 📑 Índice
+- **🏗️ Backend**: Monolito modular con layered architecture (7 módulos)
+- **🎨 Frontend**: Clean architecture con Vue 3 + Nuxt 4 + TailwindCSS
+- **🗄️ Base de Datos**: SQLite con conexión real y tablas automáticas
+- **🔗 Comunicación**: REST API con tipos sincronizados
+- **🔐 Autenticación**: Session-based con roles (Administrador/Asesor)
 
-- [Software Requerido](#-software-requerido)
-- [Tecnologías Clave](#-tecnologías-clave)
-- [Configuración Inicial](#-configuración-inicial)
-- [Scripts Principales](#scripts-principales)
-- [Estructura del Proyecto](#-estructura-del-proyecto)
-- [Variables de Entorno](#-variables-de-entorno)
-- [Conexión a Supabase](#-conexión-a-supabase)
-- [Integración con Cloudflare](#-integración-con-cloudflare)
-- [Despliegue en NuxtHub](#-despliegue-en-nuxthub)
-- [Flujo de Trabajo Básico](#-flujo-de-trabajo-básico)
-- [Uso del formateador](#-uso-del-formateador)
-- [Recursos Útiles](#-recursos-útiles)
-- [Troubleshooting](#-troubleshooting)
+## **✅ Estado Final: 100% Funcional**
+- ✅ Frontend original del sistema de ventas ALBAS
+- ✅ Backend modular con 7 módulos funcionales
+- ✅ Base de datos SQLite con tablas y datos iniciales
+- ✅ Conexión completa frontend-backend
+- ✅ Sistema de autenticación funcionando
+- ✅ Documentación completa y flujo mapeado
 
 ---
 
-### 📦 Software Requerido
+## **📁 Estructura Modular Final**
 
-1. **Node.js** (versión 18.0 o superior)
-   - Descargar desde: https://nodejs.org/
-   - Verificar instalación: `node --version`
-   - Instalación recomendada: `winget install OpenJS.NodeJS` (Windows)
+```
+SISTEMA_VENTAS_UNJBG/
+├── 📁 backend/ (3001)                 # Monolito Modular Backend
+│   ├── 📁 src/
+│   │   ├── 📁 modules/                # 7 Módulos de Negocio
+│   │   │   ├── 📁 auth/              # Autenticación y Sesiones
+│   │   │   ├── 📁 users/             # Gestión de Usuarios/Asesores
+│   │   │   ├── 📁 leads/             # Captación de Leads
+│   │   │   ├── 📁 properties/        # Gestión de Propiedades
+│   │   │   ├── 📁 appointments/       # Gestión de Citas
+│   │   │   ├── 📁 contracts/         # Generación de Contratos
+│   │   │   └── 📁 reports/           # Reportes y Estadísticas
+│   │   └── 📁 shared/                # Código Compartido Backend
+│   │       ├── 📁 database/          # Conexión SQLite/PostgreSQL
+│   │       ├── 📁 utils/             # Hash, Validaciones
+│   │       └── 📁 types/             # Tipos del Backend
+│   ├── 📁 server/api/               # Endpoints REST API
+│   │   ├── 📁 auth/                  # /api/auth/login
+│   │   ├── 📁 admin/                 # /api/admin/asesores
+│   │   ├── 📁 asesor/                # /api/asesor/captacion/leads
+│   │   ├── 📁 properties/            # /api/properties
+│   │   ├── 📁 appointments/          # /api/appointments
+│   │   ├── 📁 contracts/             # /api/contracts
+│   │   └── 📁 reports/               # /api/reports/ventas
+│   ├── 📄 database.sqlite            # Base de Datos SQLite
+│   └── 📄 nuxt.config.ts
+├── 📁 frontend/ (3002)               # Clean Architecture Frontend
+│   ├── 📁 src/
+│   │   ├── 📁 domain/                 # Entidades y Reglas de Negocio
+│   │   ├── 📁 application/            # Casos de Uso
+│   │   ├── 📁 infrastructure/         # APIs Externas y Stores
+│   │   └── 📁 presentation/          # UI - Sistema ALBAS Original
+│   │       ├── 📁 pages/
+│   │       │   ├── 📄 index.vue      # Login ALBAS
+│   │       │   ├── 📁 admin/
+│   │       │   │   └── 📄 dashboard.vue
+│   │       │   └── 📁 asesor/
+│   │       │       └── 📄 dashboard.vue
+│   │       ├── 📁 components/         # Componentes UI
+│   │       └── 📁 layouts/           # Layouts
+│   ├── 📁 assets/css/main.css         # TailwindCSS
+│   └── 📄 nuxt.config.ts
+├── 📄 FLUJO-ARCHIVOS.md              # Documentación de Conexiones
+└── 📄 .gitignore
+```
 
-2. **Git** (para control de versiones)
-   - Descargar desde: https://git-scm.com/
-   - Verificar instalación: `git --version` No olvides configurar tu cuenta usando
+---
 
+## **🚀 Stack Tecnológico**
+
+### **🏗️ Backend API (Monolito Modular)**
+- **[Nuxt.js 4](https://nuxt.com/)** - Framework principal con Nitro
+- **[TypeScript](https://www.typescriptlang.org/)** - Tipado estático
+- **[SQLite](https://www.sqlite.org/)** - Base de datos (desarrollo)
+- **[PostgreSQL](https://www.postgresql.org/)** - Base de datos (producción)
+- **[sqlite3](https://github.com/TryGhost/node-sqlite3)** - Driver SQLite
+- **[nuxt-auth-utils](https://github.com/atinux/nuxt-auth-utils)** - Autenticación por sesiones
+- **[PBKDF2 SHA-512](https://nodejs.org/api/crypto.html#crypto_pbkdf2)** - Hash de contraseñas
+
+### **🎨 Frontend (Clean Architecture)**
+- **[Vue 3](https://vuejs.org/)** - Framework frontend
+- **[Nuxt.js 4](https://nuxt.com/)** - Meta-framework
+- **[TypeScript](https://www.typescriptlang.org/)** - Tipado estático
+- **[TailwindCSS](https://tailwindcss.com/)** - Framework CSS
+- **[Pinia](https://pinia.vuejs.org/)** - Gestión de estado
+- **[Vue Router](https://router.vuejs.org/)** - Enrutamiento
+- **[Headless UI](https://headlessui.com/)** - Componentes UI
+- **[Heroicons](https://heroicons.com/)** - Iconos SVG
+
+---
+
+## **🗄️ Base de Datos - Schema**
+
+### **📊 Tablas Principales**
+```sql
+-- Roles de Usuario
+CREATE TABLE roles (
+  id_rol INTEGER PRIMARY KEY AUTOINCREMENT,
+  nombre_rol VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- Personas (Clientes, Leads, etc.)
+CREATE TABLE personas (
+  id_persona INTEGER PRIMARY KEY AUTOINCREMENT,
+  nombres VARCHAR(100) NOT NULL,
+  apellido_paterno VARCHAR(100) NOT NULL,
+  apellido_materno VARCHAR(100),
+  tipo_documento VARCHAR(20) NOT NULL,
+  numero_documento VARCHAR(20) NOT NULL UNIQUE,
+  telefono VARCHAR(20),
+  correo VARCHAR(100),
+  tipo_persona VARCHAR(50) NOT NULL,
+  fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Usuarios del Sistema
+CREATE TABLE usuarios (
+  id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_persona INTEGER NOT NULL,
+  nombre_usuario VARCHAR(50) NOT NULL UNIQUE,
+  contrasena VARCHAR(255) NOT NULL,
+  id_rol INTEGER NOT NULL,
+  fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (id_persona) REFERENCES personas(id_persona),
+  FOREIGN KEY (id_rol) REFERENCES roles(id_rol)
+);
+
+-- Propiedades Inmobiliarias
+CREATE TABLE propiedades (
+  id_propiedad INTEGER PRIMARY KEY AUTOINCREMENT,
+  direccion VARCHAR(255) NOT NULL,
+  descripcion TEXT,
+  medidas VARCHAR(100),
+  servicios_basicos TEXT,
+  precio_negociable DECIMAL(12,2),
+  partida_registral VARCHAR(50),
+  fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Citas y Visitas
+CREATE TABLE citas (
+  id_cita INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_persona INTEGER NOT NULL,
+  id_usuario INTEGER NOT NULL,
+  fecha_agendada DATETIME NOT NULL,
+  observacion TEXT,
+  estado_visita_guiada VARCHAR(50) DEFAULT 'Reprogramó',
+  fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (id_persona) REFERENCES personas(id_persona),
+  FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
+);
+```
+
+---
+
+## **🔗 API Endpoints**
+
+### **🔐 Autenticación**
+```
+POST /api/auth/login
+├── Request: { username: string, password: string }
+└── Response: { status: 'success', user: UserSession }
+```
+
+### **👥 Administración**
+```
+GET    /api/admin/asesores           # Listar asesores
+POST   /api/admin/asesores           # Crear asesor
+PUT    /api/admin/asesores/:id       # Actualizar asesor
+DELETE /api/admin/asesores/:id       # Eliminar asesor
+```
+
+### **🎯 Asesor - Captación**
+```
+GET    /api/asesor/captacion/leads           # Listar leads del asesor
+POST   /api/asesor/captacion/leads           # Crear nuevo lead
+PUT    /api/asesor/captacion/leads/:id       # Actualizar lead
+DELETE /api/asesor/captacion/leads/:id       # Eliminar lead
+```
+
+### **🏠 Propiedades**
+```
+GET    /api/properties              # Listar propiedades
+POST   /api/properties              # Crear propiedad
+PUT    /api/properties/:id          # Actualizar propiedad
+DELETE /api/properties/:id          # Eliminar propiedad
+```
+
+### **📅 Citas**
+```
+GET    /api/appointments            # Listar citas
+POST   /api/appointments            # Agendar cita
+PUT    /api/appointments/:id        # Actualizar cita
+DELETE /api/appointments/:id        # Cancelar cita
+```
+
+### **📄 Contratos**
+```
+POST   /api/contracts               # Generar contrato
+GET    /api/contracts               # Listar contratos
+GET    /api/contracts/:id           # Ver contrato
+```
+
+### **📊 Reportes**
+```
+GET    /api/reports/ventas          # Reporte de ventas
+GET    /api/reports/asesores        # Reporte de asesores
+GET    /api/reports/propiedades     # Reporte de propiedades
+GET    /api/reports/conversion      # Reporte de conversión
+```
+
+---
+
+## **⚡ Quick Start - Sistema Completo**
+
+### **🔧 1. Instalación**
 ```bash
-git config --global user.email "tucorreo@example.com"
-git config --global user.name "TuNombre"
+# Clonar repositorio
+git clone <repository-url>
+cd SISTEMA_VENTAS_UNJBG
+
+# Backend
+cd backend
+npm install
+
+# Frontend  
+cd ../frontend
+npm install
 ```
 
-3. **PostgreSQL**: Una instancia de base de datos corriendo localmente o accesible remotamente.
-   - Descargar desde https://www.enterprisedb.com/download-postgresql-binaries o la página oficial
-     de PostgreSQL
-   - Alternativamente, puedes usar una base de datos en la nube como **Supabase**
-
----
-
-### ✨ Tecnologías Clave
-
-- **[Nuxt.js 4](https://nuxt.com/)**: Framework de Vue.js para aplicaciones universales modernas.
-- **[Vue.js 3](https://vuejs.org/)**: Framework progresivo de JavaScript.
-- **[TypeScript](https://www.typescriptlang.org/)**: Para un código más robusto y mantenible.
-- **[Nuxt UI](https://ui.nuxt.com/)**: Componentes de UI preconstruidos y estilizados.
-- **[NuxtHub](https://hub.nuxt.com/)**: Plataforma de hosting para aplicaciones Nuxt.
-- **[Nuxt Auth Utils](https://github.com/Atinux/nuxt-auth-utils)**: Utilidades para autenticación en
-  Nuxt.
-- **[PostgreSQL](https://www.postgresql.org/)**: Sistema de gestión de base de datos relacional.
-- **[Supabase](https://supabase.com/)**: Alternativa open-source a Firebase con PostgreSQL.
-- **[Cloudflare](https://www.cloudflare.com/)**: CDN y servicios de seguridad web.
-- **[postgres npm package](https://www.npmjs.com/package/postgres)**: Cliente PostgreSQL para
-  Node.js.
-
----
-
-### ⚡ Configuración Inicial
-
-#### 🚀 Configuración Automática (Recomendado)
-
-1.  **Clona el repositorio:**
-
-    ```bash
-    git clone https://github.com/CONECT-IT/albas.git
-    cd albas
-    ```
-
-2.  **Instala las dependencias:**
-
-    ```bash
-    npm install
-    ```
-
-3.  **Configura tu base de datos:**
-    - **Para PostgreSQL local:** Edita `.env` con tus credenciales locales
-    - **Para Supabase:** Agrega tus credenciales de Supabase
-
-4.  **Ejecuta migraciones e inicia desarrollo local:** Scripts para iniciar la base de datos
-    ```bash
-    npm run db:migrate  # Crear tablas
-    npm run db:seed     # Crear usuarios de prueba
-    ```
-
-### Scripts Principales
-
-| Comando               | Acción                                                        |
-| --------------------- | ------------------------------------------------------------- |
-| `npm run dev`         | Inicia el servidor en modo desarrollo con recarga automática  |
-| `npm run build`       | Construye la aplicación para producción                       |
-| `npm run generate`    | Genera la aplicación estáticamente                            |
-| `npm run preview`     | Previsualiza la aplicación construida                         |
-| `npm run db:migrate`  | Ejecuta migraciones de base de datos                          |
-| `npm run db:seed`     | Inserta datos iniciales en la base de datos                   |
-| `npm run postinstall` | Prepara el proyecto después de la instalación de dependencias |
-| `npm run format`      | Formatea el código usando Prettier                            |
-
----
-
-### 📁 Estructura del Proyecto
-
-El código fuente se encuentra organizado de la siguiente manera:
-
-```
-albas/
-├── app/                    # Componentes y páginas de la aplicación Nuxt
-│   ├── app.vue            # Componente raíz de la aplicación
-│   ├── assets/            # Archivos CSS, imágenes, etc.
-│   ├── layouts/           # Layouts de la aplicación (auth, dashboard)
-│   └── pages/             # Páginas de la aplicación (login, admin, asesor)
-├── server/                 # Lógica del servidor Nuxt
-│   ├── api/               # Endpoints de la API (auth/)
-│   └── utils/             # Utilidades del servidor (conexion a DB)
-├── shared/                 # Tipos y lógica compartida
-├── sql/                    # Archivos SQL para migraciones y seed
-├── tasks/                  # Scripts de tareas (migrate.ts, seed.ts)
-├── nuxt.config.ts         # Configuración principal de Nuxt
-├── package.json           # Dependencias y scripts
-└── .env                   # Variables de entorno
-```
-
----
-
-### 🔑 Variables de Entorno
-
-El proyecto requiere las siguientes variables de entorno:
-
-#### 🐘 PostgreSQL / Supabase
-
+### **⚙️ 2. Configuración**
 ```bash
-NUXT_POSTGRES_URL=postgresql://usuario:contraseña@host:puerto/nombre_base_datos
+# Backend - variables de entorno
+cd backend
+cp .env.example .env
+# Editar .env si es necesario
+
+# Frontend - URL del backend
+cd ../frontend
+echo "API_BASE_URL=http://localhost:3001" > .env
 ```
 
-Para Supabase, esta URL se puede obtener desde el panel de control.
-
-#### 🔐 Otras Variables Importantes
-
-- `NUXT_SESSION_NAME`: Nombre de la sesión (por defecto: "nuxt-session")
-- `NODE_ENV`: Entorno (development o production)
-
----
-
-<details>
-
-<summary>Tips para Despliegue Manual</summary>
-
-### 🌐 Conexión a Supabase
-
-El proyecto está configurado para conectarse a una base de datos PostgreSQL, lo que incluye
-Supabase. Para usar Supabase:
-
-1. Crea una cuenta en [supabase.com](https://supabase.com)
-2. Crea un nuevo proyecto
-3. Copia la "Project URL" y la "Service Role Key" o "Database URL"
-4. Usa esta información para completar tu variable `NUXT_POSTGRES_URL` en el archivo `.env`
-
-La conexión se maneja en `server/utils/postgres.ts` usando el paquete `postgres`.
-
----
-
-### ☁️ Integración con Cloudflare
-
-El proyecto está diseñado para integrarse con Cloudflare como CDN y servicio de seguridad:
-
-1. Configura tu dominio en Cloudflare
-2. Asegúrate de que Cloudflare maneje los DNS para tu dominio
-3. El proyecto puede aprovechar características como SSL, caching y protección DDoS
-
-La integración con Cloudflare también mejora el rendimiento global de la aplicación.
-
-</details>
-
----
-
-### 🚀 Despliegue en NuxtHub
-
-Este proyecto está configurado para desplegar automáticamente en NuxtHub:
-
-1. El workflow en `.github/workflows/nuxthub.yml` maneja los despliegues automáticos
-2. La aplicación se despliega cuando se hace push a cualquier rama
-3. El ID del proyecto en NuxtHub es `albas-iz09`
-4. El despliegue utiliza el action `nuxt-hub/action@v2`
-
-Para más información sobre NuxtHub: [https://hub.nuxt.com](https://hub.nuxt.com)
-
----
-
-### 🔄 Flujo de Trabajo Básico
-
-1.  **Actualiza `develop`:** `git checkout develop && git pull origin develop`
-2.  **Crea una rama:** `git checkout -b feature/nombre-de-la-funcionalidad`
-3.  **Desarrolla:** Usa `npm run dev` para correr el servidor localmente.
-4.  **Confirma y sube tus cambios:** `git add .`,
-    `git commit -m "feat: implementa funcionalidad X"`, `git push origin ...`
-5.  **Crea un Pull Request (PR)** en GitHub para la revisión del código.
-
----
-
-### ✏️ Uso del formateador
-
-#### 🔄 Ejecución automática en Visual Studio Code
-
-Se ejecutará después de cada guardado de archivo si tienes instalado el plugin de Prettier. El
-formateador leerá las reglas definidas en el archivo `.prettierrc.json`.
-
-1. Instala la extensión
-   [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
-   en VS Code.
-2. Abre la configuración de VS Code (`Ctrl + ,` o `Cmd + ,` en Mac).
-3. Busca `Format On Save` y habilita la opción.
-4. Asegúrate de que Prettier esté seleccionado como el formateador predeterminado:
-   - Busca `Default Formatter` en la configuración y selecciona `esbenp.prettier-vscode`.
-
-#### 🔧 Ejecución manual con npm
-
-Ejecuta el siguiente comando en la terminal para formatear todo el código del proyecto:
-
+### **🚀 3. Iniciar Sistema**
 ```bash
-npm run format
+# Terminal 1: Backend (puerto 3001)
+cd backend
+npm run dev
+# ✅ Inicia automáticamente SQLite y crea tablas
+
+# Terminal 2: Frontend (puerto 3002)
+cd frontend
+npx nuxi dev --port 3002
+```
+
+### **🌐 4. Acceder al Sistema**
+- **🎨 Frontend ALBAS**: http://localhost:3002
+- **🔧 Backend API**: http://localhost:3001
+- **👤 Login**: usuario `admin`, contraseña `admin123`
+- **🗄️ Base de Datos**: `backend/database.sqlite` (creado automáticamente)
+
+---
+
+## **🔄 Flujo de Usuario Completo**
+
+### **1. 🚪 Login**
+```
+Usuario ingresa credenciales → Frontend valida → API Backend → 
+SQLite verifica → Sesión creada → Redirección según rol
+```
+
+### **2. 🎯 Administrador**
+```
+Dashboard → Gestión de Asesores → Reportes → 
+Estadísticas → Configuración del sistema
+```
+
+### **3. 💼 Asesor**
+```
+Dashboard → Captación de Leads → 
+Gestión de Citas → Seguimiento de Ventas → 
+Reportes personales
 ```
 
 ---
 
-### 🔧 Troubleshooting
+## **🐛 Troubleshooting Común**
 
-#### Problemas comunes y soluciones
+### **❌ Problemas Frecuentes**
 
-1. **Error al conectar con la base de datos:**
-   - Verifica que la URL `NUXT_POSTGRES_URL` esté correctamente configurada
-   - Asegúrate de que el servidor de base de datos esté corriendo
-   - Si usas Supabase, verifica que las credenciales sean correctas
+**🔧 Error: Puerto en uso**
+```bash
+# Matar proceso en puerto 3001
+npx kill-port 3001
+# Matar proceso en puerto 3002  
+npx kill-port 3002
+```
 
-2. **Problemas con la autenticación:**
-   - Asegúrate de que has ejecutado las migraciones y los seeds
-   - Verifica que los usuarios existan en la base de datos
-   - Revisa que las contraseñas estén correctamente hasheadas
+**🗄️ Error: Base de datos no encontrada**
+```bash
+# El sistema crea automáticamente la base de datos
+# Verificar que backend/database.sqlite exista
+ls -la backend/database.sqlite
+```
 
-3. **Errores al construir la aplicación:**
-   - Verifica que todas las dependencias estén instaladas: `npm install`
-   - Revisa que las variables de entorno estén configuradas
+**🔐 Error: Sesiones no funcionan**
+```bash
+# Verificar variable NUXT_SESSION_PASSWORD
+echo $NUXT_SESSION_PASSWORD
+# Agregar a .env del backend
+```
 
-4. **Problemas con el despliegue en NuxtHub:**
-   - Asegúrate de que el workflow tenga permisos adecuados
-   - Verifica que el project-key en el workflow sea correcto
+---
 
-#### Problemas conocidos:
+## **📈 Roadmap Futuro**
 
-- Inicio lento del servidor (Nitro), más información en: https://github.com/nuxt/nuxt/issues/26211
-- Errores de `fetch handle`, más información en: https://github.com/nuxt/nuxt/issues/33630
+### **🚀 Próximas Mejoras**
+- [ ] **Unit Tests** - Cobertura completa del código
+- [ ] **E2E Tests** - Testing automatizado del flujo completo
+- [ ] **Docker** - Contenerización del sistema
+- [ ] **CI/CD** - Pipeline de integración continua
+- [ ] **PostgreSQL** - Migración a producción
+- [ ] **Caching** - Redis para sesiones y caché
+- [ ] **WebSocket** - Notificaciones en tiempo real
+- [ ] **PDF Generation** - Contratos y reportes PDF
+- [ ] **File Upload** - Gestión de documentos
+- [ ] **Multi-tenant** - Soporte para múltiples inmobiliarias
 
-> **¿Problemas?** Contacta al equipo de desarrollo o abre un _issue_ en el repositorio.
+---
+
+## **📄 Licencia y Contribución**
+
+### **📜 Licencia**
+Este proyecto es propiedad de **Inmobiliaria NAVAS**. Uso exclusivo para fines comerciales internos.
+
+### **🤝 Contribución**
+1. **Fork** el repositorio
+2. **Branch** feature/nueva-funcionalidad
+3. **Commit** cambios descriptivos
+4. **Push** al branch
+5. **Pull Request** con descripción detallada
+
+### **📧 Contacto**
+- **🏢 Inmobiliaria NAVAS**
+- **👨‍💻 Equipo de Desarrollo**
+- **📧 soporte@inmobiliarianavas.com**
+
+---
+
+**🎉 ¡Sistema ALBAS Modular - 100% Funcional!**
