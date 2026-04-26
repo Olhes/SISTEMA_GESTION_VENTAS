@@ -4,8 +4,8 @@
  * No contiene lógica de negocio, solo orquestación HTTP
  */
 
-import type { ILeadUseCase } from '../../domain/ports/driving/ILeadUseCase';
-import type { CrearLeadRequest, ActualizarLeadRequest } from '../../domain/ports/driving/ILeadUseCase';
+import type { ILeadUseCase } from '../../../domain/ports/driving/ILeadUseCase';
+import type { CrearLeadRequest, ActualizarLeadRequest } from '../../../domain/ports/driving/ILeadUseCase';
 
 export class LeadController {
   constructor(private readonly leadUseCase: ILeadUseCase) {}

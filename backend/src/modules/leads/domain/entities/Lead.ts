@@ -2,7 +2,6 @@
  * Aggregate Root: Lead
  * Entidad pura de dominio sin dependencias de infraestructura
  */
-
 export type TipoPersona = "Cliente" | "Referido" | "Lead Alvas" | "Lead Propio";
 export type EstadoVendedor = "Seguimiento" | "Cierre" | "No responde";
 export type EstadoComprador = 
@@ -48,7 +47,7 @@ export interface LeadComprador extends Lead {
 
 // Métodos de dominio
 export class LeadAggregate {
-  static crearLead(data: CrearLeadData): Lead {
+  static crearLead(data: import('../../application/dto/lead.dto').CrearLeadData): Lead {
     // Validaciones de negocio
     if (!data.nombres?.trim()) {
       throw new Error('Los nombres son requeridos');
@@ -97,18 +96,5 @@ export class LeadAggregate {
   }
 }
 
-// DTOs para operaciones del dominio
-export interface CrearLeadData {
-  nombres: string;
-  apellidoPaterno: string;
-  apellidoMaterno?: string;
-  tipoDocumento?: string;
-  numeroDocumento: string;
-  telefono: string;
-  correo?: string;
-  tipoPersona: TipoPersona;
-  idUsuario: number;
-  estadoVendedor?: EstadoVendedor;
-  estadoComprador?: EstadoComprador;
-  observacion?: string;
-}
+// NOTA: CrearLeadData movido a application/dto/lead.dto.ts
+// Los DTOs pertenecen a la capa de aplicación, no al dominio 
