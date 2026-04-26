@@ -1,4 +1,4 @@
-export type TipoLead = "Comprador" | "Vendeor";
+export type TipoLead = "Comprador" | "Vendedor";
 
 export type EstadoLead =
  | "Nuevo" //Recien ingresado
@@ -12,7 +12,7 @@ export type EstadoLead =
 
 
 export type FrecuenciaContacto = "Diario" | "Semanal" | "Mensual" | "Nunca";
-export type MetodoContacto = "Telefono" | "Email" | "Redes_Sociales" | "Otro";
+export type MetodoContacto = "Telefono" | "Email" | "Redes_Sociales" | "Otro"; //DEBATE
 export type PresupuestoEstimado = "Bajo" | "Medio" | "Alto";
 export type TiposPropiedad = "Casa" | "Apartamento" | "Terreno" | "Oficina" | "Local_Comercial";
 export type TipoDocumento = "DNI" | "Pasaporte" | "Carnet_Extranjeria";
@@ -28,7 +28,7 @@ export interface Lead {
     
 
     //Contacto
-    email: string;
+    email: string; //EN DEBATE
     telefono: string;
 
     //Informacion de negocio
@@ -61,7 +61,7 @@ export interface ActividadLead{
     idLead:number;
 
     tipoActividad: "Llamada" | "Email" | "Reunion" | "Seguimiento" | "Otro";
-    metodoContacto: MetodoContacto;
+    metodoContacto: MetodoContacto; //DEBATE
 
     descripcion: string;
     resultadoContacto: "Exitoso" | "Fallido" | "Pendiente" | "Otro";
