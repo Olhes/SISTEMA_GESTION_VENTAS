@@ -3,7 +3,7 @@
  * Configura todas las dependencias del módulo siguiendo la Dependency Rule
  */
 
-import { LeadController } from './infrastructure/api/LeadController';
+import { LeadController } from './infrastructure/api/Controllers/LeadController';
 import { LeadService } from './application/use_cases/LeadService';
 import { LeadSqliteRepo } from './infrastructure/persistence/LeadSqliteRepo';
 

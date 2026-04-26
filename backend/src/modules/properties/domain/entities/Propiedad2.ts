@@ -1,0 +1,1 @@
+export type TiposPropiedad = "Casa" | "Apartamento" | "Terreno" | "Oficina" | "Local_Comercial";

@@ -23,7 +23,7 @@ export type { ILeadRepo, CreateLeadData } from './domain/ports/driven/ILeadRepo'
 
 // Implementaciones
 export { LeadService } from './application/use_cases/LeadService';
-export { LeadController } from './infrastructure/api/LeadController';
+export { LeadController } from './infrastructure/api/Controllers/LeadController';
 export { LeadSqliteRepo } from './infrastructure/persistence/LeadSqliteRepo';
 export { LeadMapper } from './infrastructure/mappers/LeadMapper';
 

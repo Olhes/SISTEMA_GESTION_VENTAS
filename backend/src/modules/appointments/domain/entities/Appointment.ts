@@ -2,7 +2,6 @@
  * Aggregate Root: Appointment
  * Entidad pura de dominio sin dependencias de infraestructura
  */
-
 export type EstadoVisitaGuiada = "Reprogramó" | "Canceló" | "No realizó visita" | "Realizó visita";
 
 export interface Cita {
