@@ -46,6 +46,10 @@ export interface Lead {
     idAsesor:number;
     observaciones?: string | null;
     
+    //Fechas de Transacción
+    fechaCompraPlaneada?: Date | null;     // Cuándo planea comprar
+    fechaVentaPlaneada?: Date | null;      // Cuándo planea vender
+    fechaLimiteDecision?: Date | null;     // Fecha límite para decidir
 
     //Auditoria
     fechaCreacion: Date;
