@@ -23,10 +23,20 @@ Sistema de Gestión de Ventas para Inmobiliaria NAVAS, **completamente migrado**
 
 ```
 SISTEMA_VENTAS_UNJBG/
-├── 📁 backend/ (3001)                 # Monolito Modular Backend
+├── 📁 backend/ (3001)                 # Monolito Modular con Arquitectura Hexagonal
 │   ├── 📁 src/
 │   │   ├── 📁 modules/                # 7 Módulos de Negocio
 │   │   │   ├── 📁 auth/              # Autenticación y Sesiones
+│   │   │   │   ├── 📁 domain/         # Entidades y Puertos del Dominio
+│   │   │   │   │   ├── 📁 entities/   # AuthAggregate, Usuario, Sesion
+│   │   │   │   │   └── 📁 ports/      # IAuthUseCase, IAuthRepo
+│   │   │   │   ├── 📁 application/    # Casos de Uso
+│   │   │   │   │   └── 📁 use_cases/  # AuthService
+│   │   │   │   ├── 📁 infrastructure/ # Adaptadores
+│   │   │   │   │   ├── 📁 api/        # AuthController
+│   │   │   │   │   ├── 📁 persistence/# AuthSqliteRepo
+│   │   │   │   │   └── 📁 mappers/    # Transformaciones
+│   │   │   │   └── � container.ts    # DI Container
 │   │   │   ├── 📁 users/             # Gestión de Usuarios/Asesores
 │   │   │   ├── 📁 leads/             # Captación de Leads
 │   │   │   ├── 📁 properties/        # Gestión de Propiedades
@@ -37,14 +47,6 @@ SISTEMA_VENTAS_UNJBG/
 │   │       ├── 📁 database/          # Conexión SQLite/PostgreSQL
 │   │       ├── 📁 utils/             # Hash, Validaciones
 │   │       └── 📁 types/             # Tipos del Backend
-│   ├── 📁 server/api/               # Endpoints REST API
-│   │   ├── 📁 auth/                  # /api/auth/login
-│   │   ├── 📁 admin/                 # /api/admin/asesores
-│   │   ├── 📁 asesor/                # /api/asesor/captacion/leads
-│   │   ├── 📁 properties/            # /api/properties
-│   │   ├── 📁 appointments/          # /api/appointments
-│   │   ├── 📁 contracts/             # /api/contracts
-│   │   └── 📁 reports/               # /api/reports/ventas
 │   ├── 📄 database.sqlite            # Base de Datos SQLite
 │   └── 📄 nuxt.config.ts
 ├── 📁 frontend/ (3002)               # Clean Architecture Frontend
@@ -71,7 +73,7 @@ SISTEMA_VENTAS_UNJBG/
 
 ## **🚀 Stack Tecnológico**
 
-### **🏗️ Backend API (Monolito Modular)**
+### **🏗️ Backend API (Monolito Modular con Arquitectura Hexagonal)**
 - **[Nuxt.js 4](https://nuxt.com/)** - Framework principal con Nitro
 - **[TypeScript](https://www.typescriptlang.org/)** - Tipado estático
 - **[SQLite](https://www.sqlite.org/)** - Base de datos (desarrollo)
@@ -79,6 +81,7 @@ SISTEMA_VENTAS_UNJBG/
 - **[sqlite3](https://github.com/TryGhost/node-sqlite3)** - Driver SQLite
 - **[nuxt-auth-utils](https://github.com/atinux/nuxt-auth-utils)** - Autenticación por sesiones
 - **[PBKDF2 SHA-512](https://nodejs.org/api/crypto.html#crypto_pbkdf2)** - Hash de contraseñas
+- **Arquitectura Hexagonal** - Dominio puro, puertos, adaptadores
 
 ### **🎨 Frontend (Clean Architecture)**
 - **[Vue 3](https://vuejs.org/)** - Framework frontend
