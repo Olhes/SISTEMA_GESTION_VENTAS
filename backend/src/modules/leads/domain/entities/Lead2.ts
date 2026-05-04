@@ -166,3 +166,81 @@ export interface HistorialLead {
   fechaCambio: Date;
 }
 
+
+export class LeadAggregate{
+  private _actividades: ActividadLead[] = [];
+  private _preferencias: PreferenciaLead;
+  private _propiedadesInteres: PropiedadDeInteres[]=[];
+  private _conversaciones: ConversacionLead[]= [];
+
+
+  constructor(
+    private readonly id:number,
+    private props: Omit<Lead, 'id' | 'fechaCreacion' | 'iltimaModificacion'>,
+    preferencias: PreferenciaLead,
+    private readonly fechaCreacion: Date= new Date()
+  ){
+    this._preferencias = preferencias;
+
+  }
+
+  get estado() { return this.props.estadoLead; }
+  get idAsesor() { return this.props.idAsesor; }
+ 
+  
+  public cambiarEstado(nuevoEstado: EstadoLead,motivo?: string): void{
+    const estadosTerminales: EstadoLead[] = ["Convertido", "Rechazado", "Inactivo"];
+  
+    if (estadosTerminales.includes(this.props.estadoLead)) {
+      throw new Error(`No se puede cambiar el estado de un Lead ya ${this.props.estadoLead}`);
+    }
+
+
+    if (nuevoEstado === "Convertido" && this._conversaciones.length === 0) {
+      throw new Error("No se puede convertir un lead sin historial de conversaciones.");
+    }
+
+    this.props.estadoLead = nuevoEstado;
+    this.props.ultimaModificaion = new Date();
+
+  }
+
+
+  public registrarActividad(actividad: Omit<ActividadLead, 'id' | 'idLead'>): void {
+    const nuevaActividad: ActividadLead = {
+      ...actividad,
+      id: 0, // El ID se genera en la DB
+      idLead: this.id,
+      fechaCreacion: new Date()
+    };
+
+    this._actividades.push(nuevaActividad);
+    this.props.ultimoContacto = nuevaActividad.fechaCreacion;
+    this.props.ultimaModificaion = new Date();
+    
+    // Si la actividad fue exitosa, el lead pasa a contactado automáticamente
+    if (actividad.resultadoContacto === "Exitoso" && this.props.estadoLead === "Nuevo") {
+      this.cambiarEstado("Contactado");
+    }
+  }
+
+  public actualizarPresupuesto(min: number, max: number): void {
+    if (min > max) {
+      throw new Error("El presupuesto mínimo no puede ser mayor al máximo.");
+    }
+    this.props.presupuestoMinimo = min;
+    this.props.presupuestoMaximo = max;
+    this.props.ultimaModificaion = new Date();
+  }
+  
+
+  public toJSON() {
+    return {
+      id: this.id,
+      ...this.props,
+      preferencias: this._preferencias,
+      actividades: [...this._actividades],
+      propiedades: [...this._propiedadesInteres]
+    };
+  }
+}
