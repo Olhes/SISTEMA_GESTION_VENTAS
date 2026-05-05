@@ -128,6 +128,7 @@ async function seedInitialData(db: any) {
 
   // Insertar usuario admin por defecto con contraseña hasheada (admin123)
   const adminPasswordHash = hash('admin123');
+  console.warn('[seed] Default admin user created with password "admin123". Change it immediately after first login.');
   await runQueryParams(db,
     `INSERT OR IGNORE INTO usuarios (id_persona, nombre_usuario, contrasena, id_rol)
      VALUES (1, 'admin', ?, 1)`,

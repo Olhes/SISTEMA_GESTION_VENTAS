@@ -27,6 +27,10 @@ import { hash, verify } from '../../../../shared/utils/hash';
 const JWT_SECRET = process.env.NUXT_JWT_SECRET || 'dev-secret-change-in-production';
 const JWT_EXPIRES_IN = 24 * 60 * 60; // 24 h in seconds
 
+if (process.env.NODE_ENV === 'production' && !process.env.NUXT_JWT_SECRET) {
+  throw new Error('[AuthService] NUXT_JWT_SECRET must be set in production');
+}
+
 export class AuthService implements IAuthUseCase {
   constructor(private readonly authRepo: IAuthRepo) {}
 
