@@ -50,77 +50,51 @@ Backend: server/api/asesor/captacion/leads/index.get.ts
 
 ---
 
-## **BACKEND - Modular Monolith**
+## **BACKEND - Arquitectura Hexagonal Modular**
 
 ### **1. Autenticación (Auth Module)**
 ```
-server/api/auth/login.post.ts
+API Request
     |
-    v (AuthService.login)
-src/modules/auth/services/auth.service.ts
+    v (AuthController)
+src/modules/auth/infrastructure/api/AuthController.ts
     |
-    v (verifyPassword)
-src/shared/utils/hash.ts
+    v (AuthService - Caso de Uso)
+src/modules/auth/application/use_cases/AuthService.ts
+    |
+    v (AuthAggregate - Dominio)
+src/modules/auth/domain/entities/Auth.ts
+    |
+    v (AuthSqliteRepo - Adaptador)
+src/modules/auth/infrastructure/persistence/AuthSqliteRepo.ts
     |
     v (Database)
-src/shared/database/connection.ts
+src/shared/database/
     |
     v (SQLite)
 ./database.sqlite
 ```
 
-### **2. Usuarios (Users Module)**
+### **2. Estructura Hexagonal por Módulo**
 ```
-server/api/admin/asesores/index.get.ts
-    |
-    v (UsersService.listarAsesores)
-src/modules/users/services/users.service.ts
-    |
-    v (Database)
-src/shared/database/connection.ts
-```
-
-### **3. Leads (Leads Module)**
-```
-server/api/asesor/captacion/leads/index.get.ts
-    |
-    v (LeadsService.listarLeadsVendedor)
-src/modules/leads/services/leads.service.ts
-    |
-    v (Database)
-src/shared/database/connection.ts
-```
-
-### **4. Propiedades (Properties Module)**
-```
-server/api/properties/index.get.ts
-    |
-    v (PropertiesService.listarPropiedades)
-src/modules/properties/services/properties.service.ts
-```
-
-### **5. Citas (Appointments Module)**
-```
-server/api/appointments/index.get.ts
-    |
-    v (AppointmentsService.listarCitas)
-src/modules/appointments/services/appointments.service.ts
-```
-
-### **6. Contratos (Contracts Module)**
-```
-server/api/contracts/index.post.ts
-    |
-    v (ContractsService.generarContrato)
-src/modules/contracts/services/contracts.service.ts
-```
-
-### **7. Reportes (Reports Module)**
-```
-server/api/reports/ventas.get.ts
-    |
-    v (ReportsService.generarReporteVentas)
-src/modules/reports/services/reports.service.ts
+modules/
+├── auth/
+│   ├── domain/           # Lógica de negocio pura
+│   │   ├── entities/    # AuthAggregate, Usuario, Sesion
+│   │   └── ports/        # IAuthUseCase (driving), IAuthRepo (driven)
+│   ├── application/      # Casos de uso
+│   │   └── use_cases/    # AuthService
+│   ├── infrastructure/   # Adaptadores
+│   │   ├── api/          # AuthController (HTTP)
+│   │   ├── persistence/  # AuthSqliteRepo (DB)
+│   │   └── mappers/      # Transformaciones
+│   └── container.ts      # DI Container
+├── users/               # Estructura similar
+├── leads/               # Estructura similar
+├── properties/          # Estructura similar
+├── appointments/         # Estructura similar
+├── contracts/           # Estructura similar
+└── reports/             # Estructura similar
 ```
 
 ---
@@ -129,12 +103,9 @@ src/modules/reports/services/reports.service.ts
 
 ### **1. Inicialización**
 ```
-backend/src/shared/database/plugin.ts
+backend/src/shared/database/
     |
     v (initializeDatabase)
-backend/src/shared/database/init.ts
-    |
-    v (createTables)
 SQLite: ./database.sqlite
 ```
 
@@ -211,13 +182,13 @@ frontend/src/infrastructure/api/*.ts
 frontend/src/infrastructure/stores/*.ts
 ```
 
-### **2. Backend Types**
+### **Backend Types**
 ```
-backend/src/shared/types/index.ts
+backend/src/shared/types/
     |
     v (import)
-backend/src/modules/*/services/*.ts
-backend/server/api/*.ts
+backend/src/modules/*/domain/entities/*.ts
+backend/src/modules/*/domain/ports/*.ts
 ```
 
 ### **3. Configuración**
@@ -231,6 +202,7 @@ Backend: backend/nuxt.config.ts
     - Database Plugin
     - Auth Utils
     - Session Configuration
+    - Arquitectura Hexagonal
 ```
 
 ---
@@ -251,10 +223,16 @@ LoginUseCase llama a AuthApiRepository
 AuthApiRepository hace POST a /api/auth/login
     |
     v
-Backend AuthService procesa login
+Backend AuthController recibe request
     |
     v
-AuthService verifica en SQLite
+AuthService (caso de uso) procesa login
+    |
+    v
+AuthAggregate (dominio) valida credenciales
+    |
+    v
+AuthSqliteRepo (adaptador) verifica en SQLite
     |
     v
 Si OK: Retorna datos de usuario
@@ -271,10 +249,19 @@ Asesor entra a /asesor
 Dashboard carga leads desde API
     |
     v
-GET /api/asesor/captacion/leads
+GET /api/leads
     |
     v
-Backend LeadsService consulta SQLite
+Backend LeadsController recibe request
+    |
+    v
+LeadsService (caso de uso) procesa solicitud
+    |
+    v
+LeadAggregate (dominio) aplica reglas de negocio
+    |
+    v
+LeadsRepo (adaptador) consulta SQLite
     |
     v
 Retorna lista de leads del asesor
@@ -298,11 +285,13 @@ Frontend muestra en tabla
 - SQLite3 (base de datos)
 - nuxt-auth-utils (sesiones)
 - TypeScript (tipos)
+- Arquitectura Hexagonal (dominio puro, puertos, adaptadores)
 
 ### **Comunicación**
 - REST API (HTTP/JSON)
 - Session-based authentication
 - Environment variables para URLs
+- Arquitectura Hexagonal (desacoplamiento)
 
 ---
 
@@ -342,27 +331,24 @@ SISTEMA_VENTAS_UNJBG/
 |-- backend/ (3001)
 |   |-- src/
 |   |   |-- modules/
-|   |   |   |-- auth/services/auth.service.ts
-|   |   |   |-- users/services/users.service.ts
-|   |   |   |-- leads/services/leads.service.ts
-|   |   |   |-- properties/services/properties.service.ts
-|   |   |   |-- appointments/services/appointments.service.ts
-|   |   |   |-- contracts/services/contracts.service.ts
-|   |   |   |-- reports/services/reports.service.ts
+|   |   |   |-- auth/
+|   |   |   |   |-- domain/entities/Auth.ts
+|   |   |   |   |-- domain/ports/
+|   |   |   |   |-- application/use_cases/AuthService.ts
+|   |   |   |   |-- infrastructure/api/AuthController.ts
+|   |   |   |   |-- infrastructure/persistence/AuthSqliteRepo.ts
+|   |   |   |   |-- infrastructure/mappers/
+|   |   |   |   └-- container.ts
+|   |   |   |-- users/ (estructura similar)
+|   |   |   |-- leads/ (estructura similar)
+|   |   |   |-- properties/ (estructura similar)
+|   |   |   |-- appointments/ (estructura similar)
+|   |   |   |-- contracts/ (estructura similar)
+|   |   |   |-- reports/ (estructura similar)
 |   |   |-- shared/
-|   |   |   |-- database/connection.ts
-|   |   |   |-- database/init.ts
-|   |   |   |-- database/plugin.ts
-|   |   |   |-- utils/hash.ts
-|   |   |   |-- types/index.ts
-|   |-- server/api/
-|   |   |-- auth/login.post.ts
-|   |   |-- admin/asesores/
-|   |   |-- asesor/captacion/leads/
-|   |   |-- properties/
-|   |   |-- appointments/
-|   |   |-- contracts/
-|   |   |-- reports/
+|   |   |   |-- database/
+|   |   |   |-- utils/
+|   |   |   └-- types/
 |   |-- nuxt.config.ts
 |   |-- database.sqlite (creado automáticamente)
 |
@@ -379,7 +365,7 @@ SISTEMA_VENTAS_UNJBG/
 |   |   |-- types/api.ts
 |   |-- nuxt.config.ts
 |
-|-- README-MODULAR.md
+|-- README.md
 |-- FLUJO-ARCHIVOS.md
 ```
 
@@ -388,9 +374,13 @@ SISTEMA_VENTAS_UNJBG/
 ## **RESUMEN DE CONEXIONES**
 
 1. **Frontend** se conecta a **Backend** vía REST API
-2. **Backend** se conecta a **SQLite** vía DatabaseManager
-3. **Tipos** están duplicados pero sincronizados
-4. **Sesiones** manejadas por nuxt-auth-utils
-5. **Estados** gestionados por Pinia stores
+2. **Backend** usa **Arquitectura Hexagonal**:
+   - **Domain**: Lógica de negocio pura (AuthAggregate, LeadAggregate)
+   - **Application**: Casos de uso (AuthService, LeadsService)
+   - **Infrastructure**: Adaptadores (AuthController, AuthSqliteRepo)
+3. **Backend** se conecta a **SQLite** vía Repository Pattern
+4. **Tipos** están sincronizados entre frontend y backend
+5. **Sesiones** manejadas por nuxt-auth-utils
+6. **Estados** gestionados por Pinia stores
 
-**¡Todo conectado y funcional!**
+**¡Arquitectura Hexagonal implementada y funcional!**

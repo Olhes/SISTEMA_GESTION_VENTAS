@@ -5,6 +5,10 @@
 
 export type RolNombre = "Administrador" | "Asesor";
 
+//verificacion 2 pasos?
+//guardar ip?
+export type EstadoUsuario = "Activo" | "Inactivo";
+
 export interface Usuario {
   id: number;
   idPersona: number;
@@ -27,6 +31,36 @@ export interface Sesion {
   token: string;
   fechaCreacion: Date;
   fechaExpiracion: Date;
+  activa: boolean;
+}
+
+export interface SesionUsuario {
+  id: number;
+  idUsuario: number;
+  token: string;
+  refreshToken?: string;
+  fechaInicio: Date;
+  fechaExpiracion: Date;
+  fechaCierre?: Date | null;
+  activa: boolean;
+}
+
+export interface CambioContraseña {
+  id: number;
+  idUsuario: number;
+  contrasenaAnterior: string;
+  contrasenaNueva: string;
+  motivo: "Cambio_Voluntario" | "Restablecimiento";
+  fechaCambio: Date;
+  activa: boolean;
+}
+
+export interface HistorialAcceso {
+  id: number;
+  idUsuario: number;
+  accion: string; //"Crear Lead","Actualizar_propiedad","Generar Reporte"
+  modulo: string; //"Leads","Propiedades","Reportes"
+  fechaAcceso: Date;
   activa: boolean;
 }
 
