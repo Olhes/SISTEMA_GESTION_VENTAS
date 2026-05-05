@@ -29,12 +29,18 @@ export class AuthSqliteRepo implements IAuthRepo {
   constructor() {
     this.db = DatabaseManager.getInstance({
       type: 'sqlite',
-      url: './database.sqlite'
+      url: './database.sqlite',
     });
+  }
+
+  /** Ensures the database connection is open before running queries. */
+  private async ensureConnected(): Promise<void> {
+    await this.db.connect();
   }
 
   // Operaciones de usuarios
   async findById(id: number): Promise<Usuario | null> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     
     return new Promise((resolve, reject) => {
@@ -57,6 +63,7 @@ export class AuthSqliteRepo implements IAuthRepo {
   }
 
   async findByNombreUsuario(nombreUsuario: string): Promise<Usuario | null> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     
     return new Promise((resolve, reject) => {
@@ -79,6 +86,7 @@ export class AuthSqliteRepo implements IAuthRepo {
   }
 
   async findAll(): Promise<UsuarioConDetalles[]> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     
     return new Promise((resolve, reject) => {
@@ -109,6 +117,7 @@ export class AuthSqliteRepo implements IAuthRepo {
   }
 
   async save(usuario: Usuario): Promise<Usuario> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     
     return new Promise((resolve, reject) => {
@@ -143,6 +152,7 @@ export class AuthSqliteRepo implements IAuthRepo {
   }
 
   async update(id: number, usuario: Partial<Usuario>): Promise<Usuario> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     const existingUsuario = await this.findById(id);
     
@@ -180,6 +190,7 @@ export class AuthSqliteRepo implements IAuthRepo {
   }
 
   async delete(id: number): Promise<void> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     
     return new Promise((resolve, reject) => {
@@ -201,6 +212,7 @@ export class AuthSqliteRepo implements IAuthRepo {
 
   // Operaciones con detalles
   async findByIdWithDetails(id: number): Promise<UsuarioConDetalles | null> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     
     return new Promise((resolve, reject) => {
@@ -233,6 +245,7 @@ export class AuthSqliteRepo implements IAuthRepo {
   }
 
   async findByNombreUsuarioWithDetails(nombreUsuario: string): Promise<UsuarioConDetalles | null> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     
     return new Promise((resolve, reject) => {
@@ -266,6 +279,7 @@ export class AuthSqliteRepo implements IAuthRepo {
 
   // Validaciones de negocio
   async nombreUsuarioDisponible(nombreUsuario: string): Promise<boolean> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     
     return new Promise((resolve, reject) => {
@@ -286,6 +300,7 @@ export class AuthSqliteRepo implements IAuthRepo {
   }
 
   async personaValida(idPersona: number): Promise<boolean> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     
     return new Promise((resolve, reject) => {
@@ -306,6 +321,7 @@ export class AuthSqliteRepo implements IAuthRepo {
   }
 
   async rolValido(idRol: number): Promise<boolean> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     
     return new Promise((resolve, reject) => {
@@ -327,6 +343,7 @@ export class AuthSqliteRepo implements IAuthRepo {
 
   // Operaciones de sesiones
   async crearSesion(sesion: Omit<Sesion, 'id' | 'fechaCreacion'>): Promise<Sesion> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     
     return new Promise((resolve, reject) => {
@@ -359,6 +376,7 @@ export class AuthSqliteRepo implements IAuthRepo {
   }
 
   async findByToken(token: string): Promise<Sesion | null> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     
     return new Promise((resolve, reject) => {
@@ -381,9 +399,9 @@ export class AuthSqliteRepo implements IAuthRepo {
   }
 
   async updateSesion(id: number, sesion: Partial<Sesion>): Promise<Sesion> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
-    const existingSesion = await this.findByToken('');
-    
+
     return new Promise((resolve, reject) => {
       if (this.db.isSQLite()) {
         (database as any).run(
@@ -402,6 +420,7 @@ export class AuthSqliteRepo implements IAuthRepo {
   }
 
   async deleteSesion(id: number): Promise<void> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     
     return new Promise((resolve, reject) => {
@@ -422,6 +441,7 @@ export class AuthSqliteRepo implements IAuthRepo {
   }
 
   async findSesionesActivasByUsuario(idUsuario: number): Promise<Sesion[]> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     
     return new Promise((resolve, reject) => {
@@ -442,6 +462,7 @@ export class AuthSqliteRepo implements IAuthRepo {
   }
 
   async deleteSesionesByUsuario(idUsuario: number): Promise<void> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     
     return new Promise((resolve, reject) => {
@@ -463,6 +484,7 @@ export class AuthSqliteRepo implements IAuthRepo {
 
   // Operaciones de roles
   async findAllRoles(): Promise<Rol[]> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     
     return new Promise((resolve, reject) => {
@@ -483,6 +505,7 @@ export class AuthSqliteRepo implements IAuthRepo {
   }
 
   async findRolById(id: number): Promise<Rol | null> {
+    await this.ensureConnected();
     const database = this.db.getDatabase();
     
     return new Promise((resolve, reject) => {

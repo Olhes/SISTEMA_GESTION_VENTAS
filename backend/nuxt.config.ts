@@ -25,6 +25,7 @@ export default defineNuxtConfig({
     },
   ],
   runtimeConfig: {
+    jwtSecret: process.env.NUXT_JWT_SECRET || 'dev-secret-change-in-production',
     session: {
       name: "nuxt-session",
       password: process.env.NUXT_SESSION_PASSWORD || "password-that-should-be-changed",

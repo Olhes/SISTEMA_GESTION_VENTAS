@@ -1,4 +1,5 @@
 import DatabaseManager from './connection';
+import { hash } from '../utils/hash';
 
 export async function initializeDatabase() {
   const dbManager = DatabaseManager.getInstance({
@@ -50,8 +51,23 @@ async function createTables(db: any) {
       contrasena VARCHAR(255) NOT NULL,
       id_rol INTEGER NOT NULL,
       fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+      ultimo_login DATETIME,
+      activo INTEGER NOT NULL DEFAULT 1,
       FOREIGN KEY (id_persona) REFERENCES personas(id_persona),
       FOREIGN KEY (id_rol) REFERENCES roles(id_rol)
+    )
+  `);
+
+  // Tabla de sesiones (tokens JWT activos)
+  await runQuery(db, `
+    CREATE TABLE IF NOT EXISTS sesiones (
+      id_sesion INTEGER PRIMARY KEY AUTOINCREMENT,
+      id_usuario INTEGER NOT NULL,
+      token TEXT NOT NULL UNIQUE,
+      fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+      fecha_expiracion DATETIME NOT NULL,
+      activa INTEGER NOT NULL DEFAULT 1,
+      FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
     )
   `);
 
@@ -103,16 +119,27 @@ async function seedInitialData(db: any) {
     INSERT OR IGNORE INTO roles (nombre_rol) VALUES ('Administrador'), ('Asesor')
   `);
 
-  // Insertar usuario admin por defecto
+  // Insertar persona admin por defecto
   await runQuery(db, `
     INSERT OR IGNORE INTO personas 
     (nombres, apellido_paterno, apellido_materno, tipo_documento, numero_documento, tipo_persona)
     VALUES ('Administrador', 'Sistema', '', 'DNI', '12345678', 'Interno')
   `);
 
-  await runQuery(db, `
-    INSERT OR IGNORE INTO usuarios 
-    (id_persona, nombre_usuario, contrasena, id_rol)
-    VALUES (1, 'admin', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj6ukx.LFvO6', 1)
-  `);
+  // Insertar usuario admin por defecto con contraseña hasheada (admin123)
+  const adminPasswordHash = hash('admin123');
+  await runQueryParams(db,
+    `INSERT OR IGNORE INTO usuarios (id_persona, nombre_usuario, contrasena, id_rol)
+     VALUES (1, 'admin', ?, 1)`,
+    [adminPasswordHash]
+  );
+}
+
+async function runQueryParams(db: any, query: string, params: any[]): Promise<void> {
+  return new Promise((resolve, reject) => {
+    db.run(query, params, (err: any) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
 }

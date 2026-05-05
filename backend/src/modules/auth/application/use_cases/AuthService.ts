@@ -11,7 +11,7 @@ import type {
   ActualizarUsuarioRequest,
   CambiarContrasenaRequest
 } from '../../domain/ports/driving/IAuthUseCase';
-import type { IAuthRepo, CreateUsuarioData, CreateSesionData } from '../../domain/ports/driven/IAuthRepo';
+import type { IAuthRepo, CreateSesionData } from '../../domain/ports/driven/IAuthRepo';
 import type { 
   Usuario,
   UsuarioConDetalles,
@@ -19,9 +19,13 @@ import type {
   Rol,
   Credenciales,
   CrearUsuarioData as DominioCrearUsuarioData,
-  ActualizarUsuarioData as DominioActualizarUsuarioData
 } from '../../domain/entities/Auth';
 import { AuthAggregate } from '../../domain/entities/Auth';
+import { signJWT, verifyJWT } from '../../../../shared/utils/jwt';
+import { hash, verify } from '../../../../shared/utils/hash';
+
+const JWT_SECRET = process.env.NUXT_JWT_SECRET || 'dev-secret-change-in-production';
+const JWT_EXPIRES_IN = 24 * 60 * 60; // 24 h in seconds
 
 export class AuthService implements IAuthUseCase {
   constructor(private readonly authRepo: IAuthRepo) {}
@@ -33,42 +37,28 @@ export class AuthService implements IAuthUseCase {
       throw new Error('Usuario o contraseña incorrectos');
     }
 
-    // Validar contraseña (en un sistema real se usaría hash)
-    const credencialesValidas: Credenciales = {
-      nombreUsuario: credenciales.nombreUsuario.toLowerCase(),
-      contrasena: credenciales.contrasena // En producción, esto debería ser un hash
-    };
-
-    if (!AuthAggregate.validarCredenciales(usuario, credencialesValidas)) {
-      throw new Error('Usuario o contraseña incorrectos');
-    }
-
     if (!AuthAggregate.puedeIniciarSesion(usuario)) {
       throw new Error('Usuario inactivo');
+    }
+
+    // Verificar contraseña con hash seguro
+    if (!verify(credenciales.contrasena, usuario.contrasena)) {
+      throw new Error('Usuario o contraseña incorrectos');
     }
 
     // Actualizar último login
     const usuarioActualizado = AuthAggregate.actualizarUltimoLogin(usuario);
     await this.authRepo.update(usuario.id, { ultimoLogin: usuarioActualizado.ultimoLogin });
 
-    // Crear sesión
+    // Crear JWT
     const token = this.generarToken(usuario);
-    const fechaExpiracion = new Date();
-    fechaExpiracion.setHours(fechaExpiracion.getHours() + 24); // 24 horas
-
-    const sesionData: CreateSesionData = {
-      id_usuario: usuario.id,
-      token,
-      fecha_creacion: new Date().toISOString(),
-      fecha_expiracion: fechaExpiracion.toISOString(),
-      activa: true
-    };
+    const fechaExpiracion = new Date(Date.now() + JWT_EXPIRES_IN * 1000);
 
     await this.authRepo.crearSesion({
-      idUsuario: sesionData.id_usuario,
-      token: sesionData.token,
-      fechaExpiracion: new Date(sesionData.fecha_expiracion),
-      activa: sesionData.activa
+      idUsuario: usuario.id,
+      token,
+      fechaExpiracion,
+      activa: true,
     });
 
     return {
@@ -78,10 +68,10 @@ export class AuthService implements IAuthUseCase {
         id: usuario.id,
         nombreUsuario: usuario.nombreUsuario,
         nombreCompleto: this.getNombreCompleto(usuario),
-        rol: usuario.rol?.nombreRol || 'Sin rol'
+        rol: usuario.rol?.nombreRol || 'Sin rol',
       },
       token,
-      expiresIn: 24 * 60 * 60 // 24 horas en segundos
+      expiresIn: JWT_EXPIRES_IN,
     };
   }
 
@@ -118,25 +108,17 @@ export class AuthService implements IAuthUseCase {
     // Cerrar sesión actual
     await this.logout(token);
 
-    // Crear nuevo token
+    // Crear nuevo JWT
     const nuevoToken = this.generarToken(usuario);
-    const fechaExpiracion = new Date();
-    fechaExpiracion.setHours(fechaExpiracion.getHours() + 24);
-
-    const sesionData: CreateSesionData = {
-      id_usuario: usuario.id,
-      token: nuevoToken,
-      fecha_creacion: new Date().toISOString(),
-      fecha_expiracion: fechaExpiracion.toISOString(),
-      activa: true
-    };
+    const fechaExpiracion = new Date(Date.now() + JWT_EXPIRES_IN * 1000);
 
     await this.authRepo.crearSesion({
-      idUsuario: sesionData.id_usuario,
-      token: sesionData.token,
-      fechaExpiracion: new Date(sesionData.fecha_expiracion),
-      activa: sesionData.activa
+      idUsuario: usuario.id,
+      token: nuevoToken,
+      fechaExpiracion,
+      activa: true,
     });
+
     return nuevoToken;
   }
 
@@ -157,28 +139,15 @@ export class AuthService implements IAuthUseCase {
       throw new Error('El rol especificado no es válido');
     }
 
-    // Transformar datos para el dominio
+    // Hashear contraseña antes de guardar
     const dominioData: DominioCrearUsuarioData = {
       idPersona: usuarioData.idPersona,
       nombreUsuario: usuarioData.nombreUsuario,
-      contrasena: usuarioData.contrasena, // En producción, esto debería ser un hash
-      idRol: usuarioData.idRol
+      contrasena: hash(usuarioData.contrasena),
+      idRol: usuarioData.idRol,
     };
 
-    // Usar el Aggregate Root para crear el usuario
     const usuario = AuthAggregate.crearUsuario(dominioData);
-
-    // Guardar a través del repositorio
-    const createData: CreateUsuarioData = {
-      id_persona: usuario.idPersona,
-      nombre_usuario: usuario.nombreUsuario,
-      contrasena: usuario.contrasena,
-      id_rol: usuario.idRol,
-      fecha_creacion: usuario.fechaCreacion.toISOString(),
-      ultimo_login: usuario.ultimoLogin?.toISOString(),
-      activo: usuario.activo
-    };
-
     return await this.authRepo.save(usuario);
   }
 
@@ -260,13 +229,13 @@ export class AuthService implements IAuthUseCase {
       throw new Error('Usuario no encontrado');
     }
 
-    // Validar contraseña actual (en producción se usaría hash)
-    if (usuario.contrasena !== contrasenaActual) {
+    // Verificar contraseña actual con hash seguro
+    if (!verify(contrasenaActual, usuario.contrasena)) {
       throw new Error('Contraseña actual incorrecta');
     }
 
     const usuarioActualizado = AuthAggregate.cambiarContrasena(usuario, nuevaContrasena);
-    await this.authRepo.update(id, { contrasena: usuarioActualizado.contrasena });
+    await this.authRepo.update(id, { contrasena: hash(usuarioActualizado.contrasena) });
   }
 
   async listarRoles(): Promise<Rol[]> {
@@ -287,14 +256,15 @@ export class AuthService implements IAuthUseCase {
 
   // Métodos privados de ayuda
   private generarToken(usuario: UsuarioConDetalles): string {
-    // En producción, se usaría JWT u otro sistema de tokens seguro
-    const payload = {
-      id: usuario.id,
-      nombreUsuario: usuario.nombreUsuario,
-      rol: usuario.rol?.nombreRol,
-      timestamp: Date.now()
-    };
-    return Buffer.from(JSON.stringify(payload)).toString('base64');
+    return signJWT(
+      {
+        sub: usuario.id,
+        username: usuario.nombreUsuario,
+        rol: usuario.rol?.nombreRol ?? 'Sin rol',
+      },
+      JWT_SECRET,
+      JWT_EXPIRES_IN,
+    );
   }
 
   private getNombreCompleto(usuario: UsuarioConDetalles): string {
