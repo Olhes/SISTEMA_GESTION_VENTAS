@@ -26,6 +26,23 @@ export interface SesionUsuario{
     activa: boolean;
 }
 
+export interface AuditoriaLogin {
+  id: number;
+  idUsuario: number;
+  
+  // Intento
+  tipoIntento: "Exitoso" | "Fallido" | "Bloqueado";
+  razonFallo?: string | null;
+  
+  // Dispositivo
+  navegador: string;
+  sistemaOperativo: string;
+  direccionIp: string;
+  
+  // Auditoría
+  fechaIntento: Date;
+}
+
 export interface CambioContraseña{
     id:number;
     idUsuario:number;
@@ -46,3 +63,16 @@ export interface HistorialAcceso{
 
 }
 
+export class UsuarioAggregate{
+    private _sesionesActivas: SesionUsuario[] = [];
+    private _auditoria: AuditoriaLogin[]=[];
+    private _historialAcceso: HistorialAcceso[] = [];
+    private _cambioContraseña: CambioContraseña[]= [];
+
+    constructor(
+        private readonly id: number,
+        private props: Omit<Usuario, 'id' | 'fechaCreacion'| 'ultimaModificacion'>,
+        private readonly fechaCreacion: Date = new Date()
+    ) {}
+
+}
